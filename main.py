@@ -2,10 +2,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button, Slider, RadioButtons, TextBox
-import os
-
-PATH_TO_IMG1 = 'img1.jpg'
-PATH_TO_IMG2 = 'img2.jpg'
 
 def img_difference(current, new):
     """
@@ -373,6 +369,7 @@ def blend_with_image(img1):
     img_new = img_current.copy()
 
     # image to blend with
+    PATH_TO_IMG2 = input("Enter the image file name to blend the original image with (i.e. overlay_image.jpg): ")
     img2 = cv2.imread(PATH_TO_IMG2)
     if img2 is None:
         print("Failed to load image.")
@@ -430,6 +427,7 @@ def history_of_operations(actions):
             print(f"{i+1}: {act}")
 
 def main():
+    PATH_TO_IMG1 = input("Enter the name to the image file (i.e. image.jpg): ")
     img = cv2.imread(PATH_TO_IMG1)
     if img is None:
         print("Failed to load image.")
@@ -494,6 +492,7 @@ def main():
             history_of_operations(actions)
             save = input("Save final image? (y/n): ").strip().lower()
             if save == 'y':
+                print("Image will be saved in .jpg format.")
                 fname = input("Enter filename to save (e.g. edited_image): ")
                 cv2.imwrite(f'{fname}.jpg', img)
                 print(f"Image successfully saved as {fname}")
