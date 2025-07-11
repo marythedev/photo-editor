@@ -229,22 +229,22 @@ def add_padding(img):
     def on_square(event):
         nonlocal ratio
         ratio = 'Square'
-        ratio_input1.set_visible(False)
-        ratio_input2.set_visible(False)
+        ratio_input1_position.set_visible(False)
+        ratio_input2_position.set_visible(False)
         apply_padding()
 
     def on_rectangle(event):
         nonlocal ratio
         ratio = 'Rectangle'
-        ratio_input1.set_visible(False)
-        ratio_input2.set_visible(False)
+        ratio_input1_position.set_visible(False)
+        ratio_input2_position.set_visible(False)
         apply_padding()
 
     def on_custom(event):
         nonlocal ratio
         ratio = 'Custom Ratio'
-        ratio_input1.set_visible(True)
-        ratio_input2.set_visible(True)
+        ratio_input1_position.set_visible(True)
+        ratio_input2_position.set_visible(True)
         apply_padding()
 
     def on_ratio_change(_):
@@ -275,7 +275,8 @@ def add_padding(img):
     # buttons to complete or disregard operation
     done = False
 
-    done_btn_position = plt.axes([0.3, 0.02, 0.2, 0.05])
+    done_btn_position = plt.axes([0.05, 0.02, 0.15, 0.05])
+
     done_btn = Button(done_btn_position, 'Done')
     def on_done(event):
         nonlocal done
@@ -283,7 +284,7 @@ def add_padding(img):
         plt.close()
     done_btn.on_clicked(on_done)
     
-    cancel_btn_position = plt.axes([0.6, 0.02, 0.2, 0.05])
+    cancel_btn_position = plt.axes([0.25, 0.02, 0.15, 0.05])
     cancel_btn = Button(cancel_btn_position, 'Cancel')
     def on_cancel(event):
         nonlocal done
@@ -307,7 +308,7 @@ def apply_threshold(img):
     figure.suptitle('Apply Thresholding (binary or inverse)', fontsize=16, fontweight='bold', y=0.95)
 
     # radio buttons for threshold type
-    radio_position = plt.axes([0.2, 0.15, 0.6, 0.1])
+    radio_position = plt.axes([0.15, 0.15, 0.25, 0.1])
     radio_position.axis('off')
     radio = RadioButtons(radio_position, ('Binary', 'Binary Inverted'))
     threshold_type = cv2.THRESH_BINARY
@@ -369,11 +370,11 @@ def blend_with_image(img1):
     img_new = img_current.copy()
 
     # image to blend with
-    PATH_TO_IMG2 = input("Enter the image file name to blend the original image with (i.e. overlay_image.jpg): ")
+    PATH_TO_IMG2 = input("\nEnter the image file name to blend the original image with (i.e. overlay_image.jpg): ")
     img2 = cv2.imread(PATH_TO_IMG2)
     if img2 is None:
-        print("Failed to load image.")
-        return img1, "blend failed"
+        print("Failed to load image.\n")
+        return "Failed", img1, None
     
     # making sure both images are of the same size
     if img1.shape != img2.shape:
@@ -427,12 +428,13 @@ def history_of_operations(actions):
             print(f"{i+1}: {act}")
 
 def main():
-    PATH_TO_IMG1 = input("Enter the name to the image file (i.e. image.jpg): ")
-    img = cv2.imread(PATH_TO_IMG1)
-    if img is None:
-        print("Failed to load image.")
-        return
-    
+    img = None
+    while img is None:
+        PATH_TO_IMG1 = input("Enter the name to the image file (i.e. image.jpg): ")
+        img = cv2.imread(PATH_TO_IMG1)
+        if (img is None):
+            print("Failed to load image, try another file.\n")
+
     history = [img.copy()]
     actions = []
 
@@ -493,7 +495,7 @@ def main():
             save = input("Save final image? (y/n): ").strip().lower()
             if save == 'y':
                 print("Image will be saved in .jpg format.")
-                fname = input("Enter filename to save (e.g. edited_image): ")
+                fname = input("\nEnter filename to save (e.g. edited_image): ")
                 cv2.imwrite(f'{fname}.jpg', img)
                 print(f"Image successfully saved as {fname}")
             break
