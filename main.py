@@ -5,8 +5,20 @@ from matplotlib.widgets import Button, Slider, RadioButtons, TextBox
 
 def img_difference(current, new):
     """
-    shows 2 images side by side to display the difference made by the operation
+    Show 2 images side by side to display the difference made by the operation.
+    Uses matplotlib with 2 subplots, 1 subplot for each image.
+
+    Args:
+        current: The original image.
+        new: Modified image.
+
+    Returns:
+        tuple:
+            - figure: Created matplotlib figure with 2 images.
+            - axes (tuple): Tuple of axes objects for the current and new images.
+            - images (tuple): Tuple of image objects.
     """
+
     figure, (axis_current, axis_new) = plt.subplots(1, 2, figsize=(10, 5))
     plt.subplots_adjust(bottom=0.25)
 
@@ -20,17 +32,30 @@ def img_difference(current, new):
     return figure, (axis_current, axis_new), (image1, image2)
 
 def adjust_brightness(img):
+    """
+    Adjust the brightness of an image using the slider.
+
+    Args:
+        img: The original image.
+
+    Returns:
+        tuple:
+            - status: "Success" if change applied, "Cancelled" if it was cancelled.
+            - img_new: The resulting image after the brightness adjustment.
+            - brightness: The applied brightness value.
+    """
+
     img_current = img.copy()
     img_new = img.copy()
 
-    figure, (axis_current, axis_new), (image1, image2) = img_difference(img_current, img_new)
+    figure, _, (_, image2) = img_difference(img_current, img_new)
     figure.suptitle('Brightness Adjustment', fontsize=16, fontweight='bold', y=0.95)
 
     # slider for brightness adjustment
     slider_position = plt.axes([0.2, 0.1, 0.6, 0.03])
     slider = Slider(slider_position, 'Brightness', -100, 100, valinit=0)
 
-    def update(val):
+    def update(_val):
         value = int(slider.val)
         new_img = cv2.convertScaleAbs(img_current, alpha=1, beta=value)     # brightness adjustment
         img_new[:] = new_img
@@ -44,28 +69,41 @@ def adjust_brightness(img):
 
     done_btn_position = plt.axes([0.3, 0.02, 0.2, 0.05])
     done_btn = Button(done_btn_position, 'Done')
-    def on_done(event):
+    def on_done(_event):
         nonlocal done
         done = True
         plt.close()
     done_btn.on_clicked(on_done)
-    
+
     cancel_btn_position = plt.axes([0.6, 0.02, 0.2, 0.05])
     cancel_btn = Button(cancel_btn_position, 'Cancel')
-    def on_cancel(event):
+    def on_cancel(_event):
         nonlocal done
         done = False
         plt.close()
     cancel_btn.on_clicked(on_cancel)
-    
+
     plt.show()
     return ("Success", img_new, slider.val) if done else ("Cancelled", img_current, 0)
 
 def adjust_contrast(img):
+    """
+    Adjust contrast of an image using the slider.
+
+    Args:
+        img: The original image.
+
+    Returns:
+        tuple:
+            - status: "Success" if change applied, "Cancelled" if it was cancelled.
+            - img_new: The resulting image after the contrast adjustment.
+            - contrast: The applied contrast value.
+    """
+
     img_current = img.copy()
     img_new = img.copy()
 
-    figure, (axis_current, axis_new), (image1, image2) = img_difference(img_current, img_new)
+    figure, _, (_, image2) = img_difference(img_current, img_new)
     figure.suptitle('Contrast Adjustment', fontsize=16, fontweight='bold', y=0.95)
 
     # slider for contrast adjustment
@@ -87,7 +125,7 @@ def adjust_contrast(img):
 
     done_btn_position = plt.axes([0.3, 0.02, 0.2, 0.05])
     done_btn = Button(done_btn_position, 'Done')
-    def on_done(event):
+    def on_done(_event):
         nonlocal done
         done = True
         plt.close()
@@ -95,16 +133,26 @@ def adjust_contrast(img):
 
     cancel_btn_position = plt.axes([0.6, 0.02, 0.2, 0.05])
     cancel_btn = Button(cancel_btn_position, 'Cancel')
-    def on_cancel(event):
+    def on_cancel(_event):
         nonlocal done
         done = False
         plt.close()
     cancel_btn.on_clicked(on_cancel)
-    
+
     plt.show()
     return ("Success", img_new, slider.val) if done else ("Cancelled", img_current, 1.0)
 
 def convert_to_grayscale(img):
+    """
+    Convert an image to grayscale.
+
+    Args:
+        img: The original image.
+
+    Returns:
+        img_new: The grayscale version of the image.
+    """
+
     img_current = img.copy()
     # check if the image is already grayscale
     if len(img_current.shape) == 2:
@@ -112,13 +160,13 @@ def convert_to_grayscale(img):
     else:
         img_new = cv2.cvtColor(img_current, cv2.COLOR_BGR2GRAY)
 
-    figure, (axis_current, axis_new), (image1, image2) = img_difference(img_current, img_new)
+    figure, _, _ = img_difference(img_current, img_new)
     figure.suptitle('Convert to Grayscale', fontsize=16, fontweight='bold', y=0.95)
 
     # button to close the window
     ok_btn_position = plt.axes([0.6, 0.02, 0.2, 0.05])
     ok_btn = Button(ok_btn_position, 'Okay')
-    def on_done(event):
+    def on_done(_event):
         plt.close()
     ok_btn.on_clicked(on_done)
 
@@ -126,6 +174,27 @@ def convert_to_grayscale(img):
     return img_new
 
 def add_padding(img):
+    """
+    Add padding around an image.
+
+    Users can:
+      - Adjust padding size with a slider.
+      - Choose between square, rectangle or custom aspect ratio.
+      - Select border type: Constant, Reflect or Replicate.
+      - Enter custom ratio values.
+
+    Args:
+        img: The original image.
+
+    Returns:
+        tuple:
+            - status: "Success" if change applied, "Cancelled" if it was cancelled.
+            - img_new: Modified image with added padding.
+            - padding_size: The applied padding size value.
+            - border_type_name: The border type used (Constant, Reflect or Replicate).
+            - ratio: The aspect ratio used (square, rectangle or custom aspect ratio).
+    """
+
     img_current = img.copy()
     img_new = img.copy()
 
@@ -134,7 +203,7 @@ def add_padding(img):
     ratio = 'Rectangle'
     custom_ratio = (4, 5)
 
-    figure, (axis_current, axis_new), (image1, image2) = img_difference(img_current, img_new)
+    figure, _, (_, image2) = img_difference(img_current, img_new)
     figure.suptitle('Add padding', fontsize=16, fontweight='bold', y=0.95)
 
     # slider to adjust padding size
@@ -146,7 +215,7 @@ def add_padding(img):
     square_btn = Button(square_btn_position, 'Square')
     rectangle_btn_position = plt.axes([0.25, 0.16, 0.15, 0.05])
     rectangle_btn = Button(rectangle_btn_position, 'Rectangle')
-    custom_btn_position = plt.axes([0.45, 0.16, 0.15, 0.05]) 
+    custom_btn_position = plt.axes([0.45, 0.16, 0.15, 0.05])
     custom_btn = Button(custom_btn_position, 'Custom Ratio')
 
     # custom ratio inputs
@@ -162,7 +231,7 @@ def add_padding(img):
     border1_btn = Button(border1_btn_position, 'Constant')
     border2_btn_position = plt.axes([0.25, 0.10, 0.15, 0.05])
     border2_btn = Button(border2_btn_position, 'Reflect')
-    border3_btn_position = plt.axes([0.45, 0.10, 0.15, 0.05]) 
+    border3_btn_position = plt.axes([0.45, 0.10, 0.15, 0.05])
     border3_btn = Button(border3_btn_position, 'Replicate')
 
     border_map = {
@@ -171,7 +240,7 @@ def add_padding(img):
         'Replicate': cv2.BORDER_REPLICATE
     }
 
-    def apply_padding(val=None):
+    def apply_padding(_val=None):
         nonlocal img_new, custom_ratio
         h, w = img_current.shape[:2]
         padding = int(slider.val)
@@ -226,21 +295,21 @@ def add_padding(img):
         image2.set_data(cv2.cvtColor(img_new, cv2.COLOR_BGR2RGB))
         figure.canvas.draw_idle()
 
-    def on_square(event):
+    def on_square(_event):
         nonlocal ratio
         ratio = 'Square'
         ratio_input1_position.set_visible(False)
         ratio_input2_position.set_visible(False)
         apply_padding()
 
-    def on_rectangle(event):
+    def on_rectangle(_event):
         nonlocal ratio
         ratio = 'Rectangle'
         ratio_input1_position.set_visible(False)
         ratio_input2_position.set_visible(False)
         apply_padding()
 
-    def on_custom(event):
+    def on_custom(_event):
         nonlocal ratio
         ratio = 'Custom Ratio'
         ratio_input1_position.set_visible(True)
@@ -269,7 +338,6 @@ def add_padding(img):
     border2_btn.on_clicked(lambda event: set_border_type('Reflect'))
     border3_btn.on_clicked(lambda event: set_border_type('Replicate'))
 
-
     apply_padding()
 
     # buttons to complete or disregard operation
@@ -278,27 +346,46 @@ def add_padding(img):
     done_btn_position = plt.axes([0.05, 0.02, 0.15, 0.05])
 
     done_btn = Button(done_btn_position, 'Done')
-    def on_done(event):
+    def on_done(_event):
         nonlocal done
         done = True
         plt.close()
     done_btn.on_clicked(on_done)
-    
+
     cancel_btn_position = plt.axes([0.25, 0.02, 0.15, 0.05])
     cancel_btn = Button(cancel_btn_position, 'Cancel')
-    def on_cancel(event):
+    def on_cancel(_event):
         nonlocal done
         done = False
         plt.close()
     cancel_btn.on_clicked(on_cancel)
-    
+
     plt.show()
-    return ("Success", img_new, slider.val, border_type_name, ratio) if done else ("Cancelled", img_current, padding_size, border_type_name, ratio)
+    return (
+        "Success", img_new, slider.val, border_type_name, ratio
+    ) if done else ("Cancelled", img_current, padding_size, border_type_name, ratio)
 
 def apply_threshold(img):
+    """
+    Apply binary or inverse thresholding to a grayscale image.
+
+    Users can select the threshold type:
+      - Binary: pixels above threshold become white, below become black.
+      - Binary Inverted: pixels above threshold become black, below become white.
+
+    Args:
+        img: The original image.
+
+    Returns:
+        tuple:
+            - status: "Success" if change applied, "Cancelled" if it was cancelled.
+            - img_new: Modified image with applied thresholding.
+            - option: The thresholding type used (BINARY or "BINARY_INV)
+    """
+
     img_current = img.copy()
 
-    # convert to grayscale if the image is not 
+    # convert to grayscale if the image is not
     if len(img_current.shape) == 3:
         img_current = cv2.cvtColor(img_current, cv2.COLOR_BGR2GRAY)
 
@@ -338,7 +425,7 @@ def apply_threshold(img):
 
     done_btn_position = plt.axes([0.3, 0.02, 0.2, 0.05])
     done_btn = Button(done_btn_position, 'Done')
-    def on_done(event):
+    def on_done(_event):
         nonlocal done
         done = True
         plt.close()
@@ -346,7 +433,7 @@ def apply_threshold(img):
     
     cancel_btn_position = plt.axes([0.6, 0.02, 0.2, 0.05])
     cancel_btn = Button(cancel_btn_position, 'Cancel')
-    def on_cancel(event):
+    def on_cancel(_event):
         nonlocal done
         done = False
         plt.close()
@@ -361,6 +448,26 @@ def apply_threshold(img):
         return "Cancelled", img_current, "None"
 
 def blend_with_image(img1):
+    """
+    Blend the current image with another image.
+
+    Prompts the user to enter a second image file to blend with the original image.
+    Both images are resized to match if necessary. Users can adjust how much of each 
+    image's percentage should be taken into the final result (alpha) with a slider:
+      - alpha = 0: only the original image is visible.
+      - alpha = 1: only the second image is visible.
+      - values in between create a blend of the two images.
+
+    Args:
+        img1: The original image.
+
+    Returns:
+        tuple:
+            - status: "Success" if change applied, "Cancelled" if it was cancelled.
+            - img_new: The blended image.
+            - alpha: The alpha value used for blending images.
+    """
+
     img_current = img1.copy()
 
     # check if the image is grayscale
@@ -370,17 +477,17 @@ def blend_with_image(img1):
     img_new = img_current.copy()
 
     # image to blend with
-    PATH_TO_IMG2 = input("\nEnter the image file name to blend the original image with (i.e. overlay_image.jpg): ")
-    img2 = cv2.imread(PATH_TO_IMG2)
+    path_to_img2 = input("\nEnter the image file name to blend the original image with (i.e. overlay_image.jpg): ")
+    img2 = cv2.imread(path_to_img2)
     if img2 is None:
         print("Failed to load image.\n")
         return "Failed", img1, None
-    
+
     # making sure both images are of the same size
     if img1.shape != img2.shape:
         img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
 
-    figure, (axis_current, axis_new), (image1, image2) = img_difference(img_current, img_new)
+    figure, _, (_, image2) = img_difference(img_current, img_new)
     figure.suptitle('Blend with another image', fontsize=16, fontweight='bold', y=0.95)
 
     # slider for alpha adjustment
@@ -402,24 +509,34 @@ def blend_with_image(img1):
 
     done_btn_position = plt.axes([0.3, 0.02, 0.2, 0.05])
     done_btn = Button(done_btn_position, 'Done')
-    def on_done(event):
+    def on_done(_event):
         nonlocal done
         done = True
         plt.close()
     done_btn.on_clicked(on_done)
-    
+
     cancel_btn_position = plt.axes([0.6, 0.02, 0.2, 0.05])
     cancel_btn = Button(cancel_btn_position, 'Cancel')
-    def on_cancel(event):
+    def on_cancel(_event):
         nonlocal done
         done = False
         plt.close()
     cancel_btn.on_clicked(on_cancel)
-    
+
     plt.show()
     return ("Success", img_new, slider.val) if done else ("Cancelled", img_current, 0.35)
 
 def history_of_operations(actions):
+    """
+    Show the list of all operations performed on the current image.
+    Each operation is printed in the order it was applied, 
+    providing an overview of the editing history.
+
+    Args: actions: The list of all operations performed on the current image.
+
+    Returns: None
+    """
+
     print("\nHISTORY OF OPERATIONS:")
     if not actions:
         print("No operations performed yet.")
@@ -428,11 +545,31 @@ def history_of_operations(actions):
             print(f"{i+1}: {act}")
 
 def main():
+    """
+    Launch the Photo Editor.
+
+    Flow:
+        Prompts the user to provide path to the image file.
+        Displays a menu of image editing options, including:
+            - Adjust brightness and contrast
+            - Convert to grayscale
+            - Add padding
+            - Apply thresholding
+            - Blend with another image
+            - Undo last operation
+            - View history of operations
+            - Save and exit
+        Tracks the history of operations and allows undo.
+        Allows saving the final edited image in JPEG format.
+
+    Returns: None
+    """
+
     img = None
     while img is None:
-        PATH_TO_IMG1 = input("Enter the name to the image file (i.e. image.jpg): ")
-        img = cv2.imread(PATH_TO_IMG1)
-        if (img is None):
+        path_to_img1 = input("Enter the name to the image file (i.e. image.jpg): ")
+        img = cv2.imread(path_to_img1)
+        if img is None:
             print("Failed to load image, try another file.\n")
 
     history = [img.copy()]
@@ -443,9 +580,9 @@ def main():
         print("1. Adjust Brightness")
         print("2. Adjust Contrast")
         print("3. Convert to Grayscale")
-        print("4. Add Padding (interactive)")
+        print("4. Add Padding (custom)")
         print("5. Apply Thresholding (binary or inverse)")
-        print("6. Blend with Another Image (manual alpha)")
+        print("6. Blend with Another Image (custom)")
         print("7. Undo Last Operation")
         print("8. View History of Operations")
         print("9. Save and Exit")
